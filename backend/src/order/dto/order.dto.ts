@@ -1,5 +1,3 @@
-//TODO реализовать DTO для /orders
-
 export class CreateOrderItemDto {
   film: string;
   session: string;
@@ -7,6 +5,12 @@ export class CreateOrderItemDto {
   row: number;
   seat: number;
   price: number;
+}
+
+export class CreateOrderDto {
+  email: string;
+  phone: string;
+  tickets: CreateOrderItemDto[];
 }
 
 export class OrderItemDto extends CreateOrderItemDto {
