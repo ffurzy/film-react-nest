@@ -23,7 +23,7 @@ import { MongooseModule } from '@nestjs/mongoose';
     }),
 
     ServeStaticModule.forRoot({
-      rootPath: path.join(__dirname, '..', './public'),
+      rootPath: path.join(__dirname, '..', 'public', 'content'),
       serveRoot: '/content',
       exclude: ['/api*'],
     }),
