@@ -7,28 +7,28 @@ import {
 } from 'typeorm';
 import { Film } from './film.entity';
 
-@Entity()
+@Entity({ name: 'schedules' })
 export class Schedule {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: false })
   daytime: string;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', nullable: false })
   hall: number;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', nullable: false })
   rows: number;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', nullable: false })
   seats: number;
 
-  @Column({ type: 'double precision' })
+  @Column({ type: 'double precision', nullable: false })
   price: number;
 
-  @Column({ type: 'text', default: '' })
-  taken: number;
+  @Column({ type: 'text', default: '', nullable: false })
+  taken: string;
 
   @Column('uuid')
   filmid: string;
