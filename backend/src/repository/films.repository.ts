@@ -3,22 +3,32 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Film, FilmDocument } from '../films/schemas/film.schema';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+
+import { Film } from '../films/entities/film.entity';
+import { Schedule } from '../films/entities/schedule.entity';
 
 @Injectable()
 export class FilmsRepository {
   constructor(
-    @InjectModel(Film.name) private readonly filmModel: Model<FilmDocument>,
+    private readonly dataSource: DataSource,
+    @InjectRepository(Film)
+    private readonly filmRepo: Repository<Film>,
+    @InjectRepository(Schedule)
+    private readonly scheduleRepo: Repository<Schedule>,
   ) {}
 
   async findAll(): Promise<Film[]> {
-    return this.filmModel.find().lean();
+    return this.filmRepo.find();
   }
 
   async findByFilmId(filmId: string): Promise<Film> {
-    const film = await this.filmModel.findOne({ id: filmId }).lean();
+    const film = await this.filmRepo.findOne({
+      where: { id: filmId },
+      relations: { schedules: true },
+    });
+
     if (!film) throw new NotFoundException('Фильм не найден');
     return film;
   }
@@ -28,31 +38,37 @@ export class FilmsRepository {
     sessionId: string,
     seatKeys: string[],
   ): Promise<void> {
-    const filmExists = await this.filmModel.exists({ id: filmId });
-    if (!filmExists) throw new NotFoundException('Фильм не найден');
+    await this.dataSource.transaction(async (manager) => {
+      const schedule = await manager.getRepository(Schedule).findOne({
+        where: { id: sessionId, filmid: filmId },
+        lock: { mode: 'pessimistic_write' },
+      });
 
-    const res = await this.filmModel.updateOne(
-      {
-        id: filmId,
-        schedule: {
-          $elemMatch: {
-            id: sessionId,
-            taken: { $nin: seatKeys },
-          },
-        },
-      },
-      {
-        $addToSet: { 'schedule.$.taken': { $each: seatKeys } },
-      },
-    );
+      if (!schedule) {
+        const filmExists = await manager
+          .getRepository(Film)
+          .exist({ where: { id: filmId } });
+        if (!filmExists) throw new NotFoundException('Фильм не найден');
+        throw new NotFoundException('нет sessionId');
+      }
 
-    if (res.matchedCount === 0) {
-      const film = await this.filmModel
-        .findOne({ id: filmId, 'schedule.id': sessionId })
-        .lean();
-      if (!film) throw new NotFoundException('нет sessionId');
+      const takenStr = (schedule.taken ?? '').trim();
+      const takenSet = new Set(
+        takenStr === ''
+          ? []
+          : takenStr
+              .split(',')
+              .map((s) => s.trim())
+              .filter(Boolean),
+      );
 
-      throw new ConflictException('Место занято');
-    }
+      const hasConflict = seatKeys.some((k) => takenSet.has(k));
+      if (hasConflict) throw new ConflictException('Место занято');
+
+      seatKeys.forEach((k) => takenSet.add(k));
+      schedule.taken = Array.from(takenSet).join(',');
+
+      await manager.getRepository(Schedule).save(schedule);
+    });
   }
 }

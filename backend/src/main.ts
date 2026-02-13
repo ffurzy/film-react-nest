@@ -1,3 +1,5 @@
+import { webcrypto } from 'node:crypto';
+globalThis.crypto ??= webcrypto as any;
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import 'dotenv/config';
