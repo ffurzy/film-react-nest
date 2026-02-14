@@ -34,8 +34,8 @@ export class FilmsService {
     const film = await this.filmsRepo.findByFilmId(filmId);
 
     return {
-      total: film.schedule.length,
-      items: film.schedule.map<SessionDto>((s) => ({
+      total: film.schedules.length,
+      items: film.schedules.map<SessionDto>((s) => ({
         id: s.id,
         daytime: s.daytime,
         hall: s.hall,

@@ -2,7 +2,7 @@ export class FilmDto {
   id: string;
   rating: number;
   director: string;
-  tags: string[];
+  tags: string;
   title: string;
   about: string;
   description: string;
@@ -18,11 +18,11 @@ export class FilmsResponseDto {
 export class SessionDto {
   id: string;
   daytime: string;
-  hall: string;
+  hall: number;
   rows: number;
   seats: number;
   price: number;
-  taken: string[];
+  taken: string;
 }
 
 export class ScheduleResponseDto {
