@@ -18,6 +18,7 @@ import { Schedule } from '../films/entities/schedule.entity';
         database: config.get<string>('DATABASE_NAME'),
         synchronize: false,
         entities: [Film, Schedule],
+        logging: true,
       }),
     }),
 

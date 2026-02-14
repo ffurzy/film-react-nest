@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-
 import { Film } from '../films/entities/film.entity';
 import { Schedule } from '../films/entities/schedule.entity';
 
@@ -15,8 +14,6 @@ export class FilmsRepository {
     private readonly dataSource: DataSource,
     @InjectRepository(Film)
     private readonly filmRepo: Repository<Film>,
-    @InjectRepository(Schedule)
-    private readonly scheduleRepo: Repository<Schedule>,
   ) {}
 
   async findAll(): Promise<Film[]> {
@@ -40,7 +37,7 @@ export class FilmsRepository {
   ): Promise<void> {
     await this.dataSource.transaction(async (manager) => {
       const schedule = await manager.getRepository(Schedule).findOne({
-        where: { id: sessionId, filmid: filmId },
+        where: { id: sessionId, filmId: filmId },
         lock: { mode: 'pessimistic_write' },
       });
 
