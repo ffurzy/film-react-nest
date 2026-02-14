@@ -10,15 +10,14 @@ import { Schedule } from '../films/entities/schedule.entity';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        type: 'postgres',
+        type: config.get<'postgres'>('DATABASE_DRIVER', 'postgres'),
         host: config.get<string>('DATABASE_HOST'),
-        port: Number(config.get<string>('DATABASE_PORT')),
+        port: Number(config.get<string>('DATABASE_PORT', '5432')),
         username: config.get<string>('DATABASE_USERNAME'),
         password: config.get<string>('DATABASE_PASSWORD'),
         database: config.get<string>('DATABASE_NAME'),
         synchronize: false,
         entities: [Film, Schedule],
-        logging: true,
       }),
     }),
 
