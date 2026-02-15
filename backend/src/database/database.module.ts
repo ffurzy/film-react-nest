@@ -9,16 +9,26 @@ import { Schedule } from '../films/entities/schedule.entity';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: config.get<'postgres'>('DATABASE_DRIVER', 'postgres'),
-        host: config.get<string>('DATABASE_HOST'),
-        port: Number(config.get<string>('DATABASE_PORT', '5432')),
-        username: config.get<string>('DATABASE_USERNAME'),
-        password: config.get<string>('DATABASE_PASSWORD'),
-        database: config.get<string>('DATABASE_NAME'),
-        synchronize: false,
-        entities: [Film, Schedule],
-      }),
+      useFactory: (config: ConfigService) => {
+        const url = config.get<string>('DATABASE_URL');
+
+        if (!url) {
+          throw new Error('DATABASE_URL is not defined');
+        }
+
+        const parsed = new URL(url);
+
+        return {
+          type: 'postgres',
+          host: parsed.hostname,
+          port: Number(parsed.port) || 5432,
+          database: parsed.pathname.replace('/', ''),
+          username: config.get<string>('DATABASE_USERNAME'),
+          password: config.get<string>('DATABASE_PASSWORD'),
+          synchronize: false,
+          entities: [Film, Schedule],
+        };
+      },
     }),
 
     TypeOrmModule.forFeature([Film, Schedule]),
