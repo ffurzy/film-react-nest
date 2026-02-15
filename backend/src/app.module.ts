@@ -19,7 +19,7 @@ import { DatabaseModule } from './database/database.module';
       rootPath: path.join(process.cwd(), 'public', 'content', 'afisha'),
       serveRoot: '/content/afisha',
       serveStaticOptions: {
-        index: false,
+        index: ['bg1c.jpg'],
       },
     }),
 
