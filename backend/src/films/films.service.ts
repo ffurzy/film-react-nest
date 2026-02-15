@@ -10,9 +10,20 @@ import {
 @Injectable()
 export class FilmsService {
   constructor(private readonly filmsRepo: FilmsRepository) {}
+  private toArray(value: unknown): string[] {
+    if (!value) return [];
+    if (Array.isArray(value)) return value.map(String).filter(Boolean);
+
+    const s = String(value).trim();
+    if (!s) return [];
+    return s
+      .split(',')
+      .map((x) => x.trim())
+      .filter(Boolean);
+  }
 
   async getFilms(): Promise<FilmsResponseDto> {
-    const films = await this.filmsRepo.findAll();
+    const films = await this.filmsRepo.findAllWithSchedules();
 
     return {
       total: films.length,
@@ -20,12 +31,22 @@ export class FilmsService {
         id: f.id,
         rating: f.rating,
         director: f.director,
-        tags: f.tags,
+        tags: this.toArray(f.tags),
         title: f.title,
         about: f.about,
         description: f.description,
         image: f.image,
         cover: f.cover,
+        schedule: (f.schedules ?? []).map<SessionDto>((s) => ({
+          id: s.id,
+          session: s.id,
+          daytime: s.daytime,
+          hall: s.hall,
+          rows: s.rows,
+          seats: s.seats,
+          price: s.price,
+          taken: this.toArray(s.taken),
+        })),
       })),
     };
   }
@@ -37,15 +58,13 @@ export class FilmsService {
       total: film.schedules.length,
       items: film.schedules.map<SessionDto>((s) => ({
         id: s.id,
+        session: s.id,
         daytime: s.daytime,
         hall: s.hall,
         rows: s.rows,
         seats: s.seats,
         price: s.price,
-        taken: (s.taken ?? '')
-          .split(',')
-          .map((x) => x.trim())
-          .filter(Boolean),
+        taken: this.toArray(s.taken),
       })),
     };
   }

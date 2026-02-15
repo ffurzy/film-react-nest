@@ -20,6 +20,12 @@ export class FilmsRepository {
     return this.filmRepo.find();
   }
 
+  async findAllWithSchedules(): Promise<Film[]> {
+    return this.filmRepo.find({
+      relations: { schedules: true },
+    });
+  }
+
   async findByFilmId(filmId: string): Promise<Film> {
     const film = await this.filmRepo.findOne({
       where: { id: filmId },
