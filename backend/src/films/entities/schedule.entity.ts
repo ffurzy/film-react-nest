@@ -30,7 +30,7 @@ export class Schedule {
   @Column({ type: 'text', default: '', nullable: false })
   taken: string;
 
-  @Column('uuid')
+  @Column({ name: 'filmId', type: 'uuid' })
   filmId: string;
 
   @ManyToOne(() => Film, (film) => film.schedules)
