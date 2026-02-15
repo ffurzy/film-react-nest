@@ -16,9 +16,11 @@ import { DatabaseModule } from './database/database.module';
     DatabaseModule,
 
     ServeStaticModule.forRoot({
-      rootPath: path.join(__dirname, '..', 'public', 'content'),
-      serveRoot: '/content',
-      exclude: ['/api*'],
+      rootPath: path.join(process.cwd(), 'public', 'content', 'afisha'),
+      serveRoot: '/content/afisha',
+      serveStaticOptions: {
+        index: false,
+      },
     }),
 
     FilmsModule,

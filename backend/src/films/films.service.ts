@@ -42,7 +42,10 @@ export class FilmsService {
         rows: s.rows,
         seats: s.seats,
         price: s.price,
-        taken: s.taken,
+        taken: (s.taken ?? '')
+          .split(',')
+          .map((x) => x.trim())
+          .filter(Boolean),
       })),
     };
   }
