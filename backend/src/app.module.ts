@@ -18,9 +18,6 @@ import { DatabaseModule } from './database/database.module';
     ServeStaticModule.forRoot({
       rootPath: path.join(process.cwd(), 'public', 'content', 'afisha'),
       serveRoot: '/content/afisha',
-      serveStaticOptions: {
-        index: ['bg1c.jpg'],
-      },
     }),
 
     FilmsModule,
