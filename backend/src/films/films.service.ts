@@ -1,4 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { FilmsRepository } from '../repository/films.repository';
 import {
   FilmsResponseDto,
@@ -24,7 +27,6 @@ export class FilmsService {
 
   async getFilms(): Promise<FilmsResponseDto> {
     const films = await this.filmsRepo.findAllWithSchedules();
-
     return {
       total: films.length,
       items: films.map<FilmDto>((f) => ({
@@ -53,6 +55,7 @@ export class FilmsService {
 
   async getScheduleByFilmId(filmId: string): Promise<ScheduleResponseDto> {
     const film = await this.filmsRepo.findByFilmId(filmId);
+    if (!film) throw new NotFoundException('Фильм не найден');
 
     return {
       total: film.schedules.length,
