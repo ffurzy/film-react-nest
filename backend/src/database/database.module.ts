@@ -4,6 +4,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Film } from '../films/entities/film.entity';
 import { Schedule } from '../films/entities/schedule.entity';
 
+type DbDriver = 'postgres';
+
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -17,9 +19,11 @@ import { Schedule } from '../films/entities/schedule.entity';
         }
 
         const parsed = new URL(url);
+        const driver = (config.get<string>('DATABASE_DRIVER') ||
+          'postgres') as DbDriver;
 
         return {
-          type: 'postgres',
+          type: driver,
           host: parsed.hostname,
           port: Number(parsed.port) || 5432,
           database: parsed.pathname.replace('/', ''),
