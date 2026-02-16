@@ -67,21 +67,14 @@ export class FilmsRepository {
         throw new SessionNotFoundError();
       }
 
-      const takenStr = (schedule.taken ?? '').trim();
-      const takenSet = new Set(
-        takenStr === ''
-          ? []
-          : takenStr
-              .split(',')
-              .map((s) => s.trim())
-              .filter(Boolean),
-      );
+      const takenArr = Array.isArray(schedule.taken) ? schedule.taken : [];
+      const takenSet = new Set(takenArr);
 
       const hasConflict = seatKeys.some((k) => takenSet.has(k));
       if (hasConflict) throw new SeatConflictError();
 
       seatKeys.forEach((k) => takenSet.add(k));
-      schedule.taken = Array.from(takenSet).join(',');
+      schedule.taken = Array.from(takenSet);
 
       await manager.getRepository(Schedule).save(schedule);
     });

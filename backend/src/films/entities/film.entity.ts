@@ -12,8 +12,8 @@ export class Film {
   @Column({ type: 'varchar', nullable: false })
   director: string;
 
-  @Column({ type: 'text', nullable: false })
-  tags: string;
+  @Column({ type: 'text', array: true, default: () => 'ARRAY[]::text[]' })
+  tags: string[];
 
   @Column({ type: 'varchar', nullable: false })
   image: string;
