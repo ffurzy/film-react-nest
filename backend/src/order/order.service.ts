@@ -1,11 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import {
   CreateOrderItemDto,
   OrderResponseDto,
   OrderItemDto,
 } from './dto/order.dto';
-import { FilmsRepository } from '../repository/films.repository';
+import {
+  FilmsRepository,
+  FilmNotFoundError,
+  SessionNotFoundError,
+  SeatConflictError,
+} from '../repository/films.repository';
 
 @Injectable()
 export class OrderService {
@@ -24,7 +33,21 @@ export class OrderService {
     for (const [, groupItems] of groups) {
       const { film, session } = groupItems[0];
       const seatKeys = groupItems.map((x) => `${x.row}:${x.seat}`);
-      await this.filmsRepo.reserveSeats(film, session, seatKeys);
+
+      try {
+        await this.filmsRepo.reserveSeats(film, session, seatKeys);
+      } catch (e) {
+        if (e instanceof FilmNotFoundError) {
+          throw new NotFoundException('Фильм не найден');
+        }
+        if (e instanceof SessionNotFoundError) {
+          throw new NotFoundException('Сеанс не найден');
+        }
+        if (e instanceof SeatConflictError) {
+          throw new ConflictException('Место занято');
+        }
+        throw e;
+      }
     }
 
     const responseItems: OrderItemDto[] = items.map((i) => ({
