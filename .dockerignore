@@ -1,0 +1,9 @@
+# не копировать node_modules в образ — ставим зависимости внутри контейнера
+node_modules
+**/node_modules
+
+.git
+*.md
+.env
+.env.*
+!.env.example
